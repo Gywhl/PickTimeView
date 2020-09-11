@@ -1,0 +1,71 @@
+@Override
+    protected void onDraw(Canvas canvas) {
+//        super.onDraw(canvas);
+        getMyValue();
+        mSelectorWheelPaint.setColor(getResources().getColor(R.color.datapicker_noselect));
+        picker.setEnabled(true);
+        if (!mHasSelectorWheel) {
+            super.onDraw(canvas);
+            return;
+        }
+        final boolean showSelectorWheel = !mHideWheelUntilFocused || hasFocus();
+        float x = (mRight - mLeft) / 2;
+        float y = mCurrentScrollOffset;
+
+//        if (showSelectorWheel && mVirtualButtonPressedDrawable != null
+//                && mScrollState == OnScrollListener.SCROLL_STATE_IDLE) {
+//            if (mDecrementVirtualButtonPressed) {
+//                mVirtualButtonPressedDrawable.setState(View.PRESSED_STATE_SET);
+//                mVirtualButtonPressedDrawable.setBounds(0, 0, mRight, mTopSelectionDividerTop);
+//                mVirtualButtonPressedDrawable.draw(canvas);
+//            }
+//            if (mIncrementVirtualButtonPressed) {
+//                mVirtualButtonPressedDrawable.setState(PRESSED_STATE_SET);
+//                mVirtualButtonPressedDrawable.setBounds(0, mBottomSelectionDividerBottom, mRight,
+//                        mBottom);
+//                mVirtualButtonPressedDrawable.draw(canvas);
+//            }
+//        }
+
+        int[] selectorIndices = mSelectorIndices;
+        for (int i = 0; i < selectorIndices.length; i++) {
+            int selectorIndex = selectorIndices[i];
+            String scrollSelectorValue = mSelectorIndexToStringCache.get(selectorIndex);
+            //重点，重新设置滑动时选中和未选中字体样式
+            if (i != 1) {  //未选中
+                mSelectorWheelPaint.setColor(getResources().getColor(R.color.datapicker_noselect));
+                mSelectorWheelPaint.setTextSize(DpUtils.sp2px(mContext,14));
+            } else {   //选中
+                mSelectorWheelPaint.setColor(getResources().getColor(R.color.datapicker_select));
+                mSelectorWheelPaint.setTextSize(DpUtils.sp2px(mContext,18));
+
+                mInputText.setBackgroundColor(Color.WHITE);
+                //刷新选中状态，否则mInputText.setBackgroundColor(Color.WHITE);不会一直生效
+                performClick();
+            }
+
+            if ((showSelectorWheel && i != 1) ||
+                    (i == 1 && mInputText.getVisibility() != VISIBLE)) {
+                Rect mRect = new Rect();
+                mSelectorWheelPaint.getTextBounds(scrollSelectorValue, 0, scrollSelectorValue.length(), mRect);
+                canvas.drawText(scrollSelectorValue, x, y, mSelectorWheelPaint);
+            }
+            y += mSelectorElementHeight;
+        }
+
+        // draw the selection dividers
+        if (showSelectorWheel && mSelectionDivider != null) {
+            mSelectionDivider = new ColorDrawable(getResources().getColor(R.color.datapicker));
+            // draw the top divider
+            int topOfTopDivider = mTopSelectionDividerTop;
+            int bottomOfTopDivider = topOfTopDivider + 2;
+            mSelectionDivider.setBounds(0, topOfTopDivider, mRight, bottomOfTopDivider);
+            mSelectionDivider.draw(canvas);
+
+            // draw the bottom divider
+            int bottomOfBottomDivider = mBottomSelectionDividerBottom;
+            int topOfBottomDivider = bottomOfBottomDivider - 2;
+            mSelectionDivider.setBounds(0, topOfBottomDivider, mRight, bottomOfBottomDivider);
+            mSelectionDivider.draw(canvas);
+        }
+    }
